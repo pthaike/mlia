@@ -1,5 +1,6 @@
 #! /bin/python
 
+from numpy import *
 
 """
 load dataSet
@@ -38,7 +39,7 @@ def kernel(x, xi):
 
 def smoSimple(x, y, C, toler, maxIter):
 	x = mat(x)
-	y = mat(y)
+	y = mat(y).transpose()
 	b = 0
 	m,n = shape(x)
 	alphas = mat(zeros((m,1)))
@@ -53,8 +54,8 @@ def smoSimple(x, y, C, toler, maxIter):
 				j = selectJrand(i, m)
 				f_xj = float(multiply(alphas, y).T * kernel(x, x[j,:])) + b
 				Ej = f_xj - y[j]
-				alpha_i_old = alpha[i].copy()
-				alpha_j_old = alpha[j].copy()
+				alpha_i_old = alphas[i].copy()
+				alpha_j_old = alphas[j].copy()
 				if y[i] == y[j]:
 					L = max(0, alpha_i_old+ alpha_j_old - C)
 					H = min(C, alpha_i_old + alpha_j_old)
@@ -75,7 +76,7 @@ def smoSimple(x, y, C, toler, maxIter):
 				b2 = b - Ej - y[i] * kernel(x[i], x[j]) * (alphas[i] - alpha_i_old) - y[j] * kernel(x[j], x[j])*(alphas[j] - alpha_j_old)
 				if alphas[i] > 0 and alphas[i] < C:
 					b = b1
-				else if alphas[j] > 0 and alphas[j] < C:
+				elif alphas[j] > 0 and alphas[j] < C:
 					b = b2
 				else:
 					b = (b1 + b2) / 2.0
@@ -87,3 +88,9 @@ def smoSimple(x, y, C, toler, maxIter):
 			iter = 0
 		print "iteration number: %d" % iter
 	return alphas, b
+
+if __name__ == '__main__':
+	x,y = loadDataSet()
+	alphas, b = smoSimple(x,y,0.6,0.001,40)
+	# print alphas
+	print b
