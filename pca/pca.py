@@ -17,4 +17,18 @@ def loadDataSet(file, delim = '\t'):
 
 def pca(dataMat, topNfeat = 9999999):
 	meanVals = mean(dataMat, axis = 0)
-	meanRevove = dataMat - meanRevove
+	meanRemove = dataMat - meanVals
+	covMat = cov(meanRemove, rowvar = 0)
+	eigVals, eigVec = linalg.eig(mat(covMat))
+	eigValInd = argsort(eigVals)
+	eigValInd = eigValInd[:-(topNfeat+1):-1]
+	redEigVec = eigVec[:, eigValInd]
+	lowDDataMat = meanRemove * redEigVec
+	reconMat = lowDDataMat * redEigVec.T + meanVals
+	return lowDDataMat, reconMat
+
+
+if __name__ == "__main__":
+	datArr = loadDataSet("testSet.txt", '\t')
+	lowDDataMat, reconMat = pca(datArr, 1)
+	print lowDDataMat, reconMat
